@@ -7,8 +7,6 @@
 ### 需求
 
 > - dashboard users roles products orders
->
->
 > - 用户管理， 商品目录， 订单内容
 >
 >   ``Role based access control``
@@ -54,11 +52,22 @@
 
 ### 2.1 后端
 
-> database (连接数据库)
+> - database (连接数据库)
 >
->     - connect 用于连接
+>   - connect 用于连接
+> - routes（连接前端，接受用户指令）
+> - models
 >
-> routes（连接前端，接受用户指令）
+>   - 定义user
+>   - 定义role - 定义权限
+>   - 定义order - 定义product
+>   - 使用页面化技术展示order与product
+> - controllers
 >
-> models （定义不同user 不同角色 不同权限）
->
+>   - 定义GRUD
+>     - 每个操作需要在routes里挂钩
+>   - user
+>     - register
+>     - login
+>       - > ⚠️ password需要加密存储，验证
+>         >

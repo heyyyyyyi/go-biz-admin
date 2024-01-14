@@ -1,6 +1,6 @@
 # 关于Golang的一些学习
 
-## terminal 
+## terminal
 
 - go mod init github.com/...
   - go.mod
@@ -22,7 +22,8 @@
 > 与数据库交互
 
 - gorm:"foreignKey:RoleId"
-- 
+- gorm:"many2many:role_permissions"
+- gorm:"-" //不存
 
 ### gin
 
