@@ -71,3 +71,20 @@
 >     - login
 >       - > ⚠️ password需要加密存储，验证
 >         >
+> - middleware
+>
+>   - Authentication (login之后是否允许访问、操作)
+>     - token ～ cookie
+> - chart 支持前端显示chart
+> - 虚拟数据 便于测试
+>
+>   - faker
+
+### 2.2 前端
+
+- Angular
+  - HTML - javascript
+  - component
+    - *.html
+    - *.ts
+    - *.css

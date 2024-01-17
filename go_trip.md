@@ -16,6 +16,7 @@
 - package
 - 全局变量 var XXX
 - 函数 func Xxx    func xxx
+- interface
 
 ### gorm
 
@@ -24,6 +25,10 @@
 - gorm:"foreignKey:RoleId"
 - gorm:"many2many:role_permissions"
 - gorm:"-" //不存
+- db.preload()
+- db.find()
+- db.update()
+- db.delete()
 
 ### gin
 

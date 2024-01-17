@@ -18,7 +18,7 @@ func Connect() {
 	}
 	fmt.Println("database init...", db)
 	//建表
-	db.AutoMigrate(&models.User{}, &models.Role{}, &models.Permission{})
+	db.AutoMigrate(&models.User{}, &models.Role{}, &models.Permission{}, &models.Product{}, &models.Order{}, &models.OrderItem{})
 	DB = db
 
 }

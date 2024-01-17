@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/heyyyyyyi/go-biz-admin/database"
 	"github.com/heyyyyyyi/go-biz-admin/models"
+	"github.com/heyyyyyyi/go-biz-admin/utils"
+	"net/http"
+	"strconv"
 )
 
 // 注册，收集前端user信息，交给本函数，写入数据库
@@ -37,9 +37,10 @@ func Register(c *gin.Context) {
 		RoleId: uint(role_id),
 	}
 	//password...
-
+	user.TranslatePassword(data["password"])
 	//往表里插入函数
 	database.DB.Create(&user)
+	//c.JSON(http.StatusOK, user)
 }
 
 func Login(c *gin.Context) {
@@ -56,17 +57,40 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
 	}
-	if err := user.CompareHashAndPassword(data["password"]); err != nil {
+	if err := user.ComparePassword(data["password"]); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "incorrect password"})
 		return
 	}
+
+	// jwt
+	token, err := utils.GenerateJwt(strconv.Itoa(int(user.Id)))
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.SetCookie("jwt", token, 3600, "", "", false, true)
 	c.JSON(http.StatusOK, user)
+}
+
+func User(c *gin.Context) {
+	cookie, err := c.Cookie("jwt")
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	id, _ := utils.ParseJwt(cookie)
+	user := models.User{
+		Id: uint(id),
+	}
+	database.DB.Preload("Role").Find(&user)
+	c.JSON(http.StatusOK, user)
+	return
 }
 
 // 观看用户
 func AllUsers(c *gin.Context) {
 	var users []models.User
-	database.DB.preload("User").Find(&users)
+	database.DB.Preload("Role").Find(&users)
 	c.JSON(http.StatusOK, users)
 }
 
@@ -76,13 +100,13 @@ func FindAUser(c *gin.Context) {
 	user := models.User{
 		Id: uint(id),
 	}
-	database.DB.preload("User").Find(&user)
+	database.DB.Preload("Role").Find(&user)
 	c.JSON(http.StatusOK, user)
 }
 
 // 创建user （管理员）
 func CreateUser(c *gin.Context) {
-	var user []models.User
+	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{"message": "invalid user JSON file"})

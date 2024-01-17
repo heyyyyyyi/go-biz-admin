@@ -10,7 +10,7 @@ type Order struct {
 	LastName   string      `json:"-"`
 	Name       string      `json:"name"gorm:"-"` //数据库里不存
 	Email      string      `json:"email"`
-	UpdatedAt  string      `json:"update_at"`
+	UpdatedAt  string      `json:"updated_at"`
 	CreatedAt  string      `json:"created_at"`
 	OrderItems []OrderItem `json:"order_items" gorm:"foreignKey:OrderId"`
 	Total      float32     `json:"total" gorm:"-"` //不存，可以计算
@@ -26,13 +26,13 @@ type OrderItem struct {
 func (order *Order) Count(db *gorm.DB) int64 {
 	var total int64
 	db.Model(&Order{}).Count(&total)
-	// select count(*) from Product;
+	// select count(*) from Oder;
 	return total
 }
 
 func (order *Order) Take(db *gorm.DB, limit int, offset int) interface{} {
 	var orders []Order
-	db.preload("OrderItems").Offset(offset).Limit(limit).Find(&orders)
+	db.Preload("OrderItem").Offset(offset).Limit(limit).Find(&orders)
 	for i, _ := range orders {
 		var total float32 = 0.0
 		for _, orderItem := range orders[i].OrderItems {

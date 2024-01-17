@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,7 +12,7 @@ import (
 // 观看
 func AllRoles(c *gin.Context) {
 	var roles []models.Role
-	database.DB.preload("Role").Find(&roles)
+	database.DB.Find(&roles)
 	c.JSON(http.StatusOK, roles)
 }
 
@@ -23,7 +22,7 @@ func FindARole(c *gin.Context) {
 	role := models.Role{
 		Id: uint(id),
 	}
-	database.DB.preload("Role").Find(&role)
+	database.DB.Preload("Permissions").Find(&role)
 	c.JSON(http.StatusOK, role)
 }
 
@@ -45,12 +44,11 @@ type RoleCreateDTO struct {
 	Permissions []string `json: "permissions"`
 }
 
-func CreateUser(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Params.ByName("id"))
+func CreateRole(c *gin.Context) {
 	var roleDto RoleCreateDTO
 	if err := c.ShouldBindJSON(&roleDto); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
-			gin.H{"message": "invalid user JSON file"})
+			gin.H{"message": "invalid role JSON file"})
 		return
 	}
 	//预设密码
@@ -61,9 +59,9 @@ func CreateUser(c *gin.Context) {
 	}
 	role := models.Role{
 		Name:        roleDto.Name,
-		permissions: permissions,
+		Permissions: permissions,
 	}
-	// ...
+
 	database.DB.Create(&role)
 	c.JSON(http.StatusOK, role)
 }
@@ -95,12 +93,18 @@ func UpdateRole(c *gin.Context) {
 		id, _ := strconv.Atoi(permissionId)
 		permissions[idx] = models.Permission{Id: uint(id)}
 	}
+	var result struct{} // var result interface{} this will throw error as no zero value!
+	database.DB.Table("role_permissions").Where("role_id", id).Delete(&result)
+
 	role := models.Role{
 		Id:          uint(id),
 		Name:        roleDto.Name,
-		permissions: permissions,
+		Permissions: permissions,
 	}
-	// ...
+
+	database.DB.Model(&role).Updates(role)
+
+	c.JSON(http.StatusOK, role)
 }
 
 /*
@@ -116,5 +120,5 @@ func DeleteRole(c *gin.Context) {
 		Id: uint(id),
 	}
 	database.DB.Delete(&role)
-	c.JSON(http.StatusOK, gin.H{"message": "Delete succeed."})
+	c.JSON(http.StatusOK, gin.H{"message": "role delete successfully."})
 }

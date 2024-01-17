@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,7 +12,7 @@ import (
 // 观看
 func AllPermissions(c *gin.Context) {
 	var Permissions []models.Permission
-	database.DB.preload("Permission").Find(&Permissions)
+	database.DB.Find(&Permissions)
 	c.JSON(http.StatusOK, Permissions)
 }
 
@@ -23,6 +22,6 @@ func FindAPermission(c *gin.Context) {
 	permission := models.Permission{
 		Id: uint(id),
 	}
-	database.DB.preload("Permission").Find(&permission)
+	database.DB.Preload("Permission").Find(&permission)
 	c.JSON(http.StatusOK, permission)
 }
